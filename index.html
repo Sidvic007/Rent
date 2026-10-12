@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monthly Rent Bill – Kathmandu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #E8EDF1;
+    --paper: #FFFFFF;
+    --ink: #17263A;
+    --muted: #5B6B7C;
+    --line: #CDD6DE;
+    --field: #F6F8FA;
+    --accent: #1F6F6B;
+    --accent-ink: #FFFFFF;
+    --warn: #B3261E;
+    --mark: #F0B429;
+    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1720; --paper: #17222E; --ink: #E6ECF2; --muted: #93A3B3;
+      --line: #2B3A49; --field: #1D2B39; --accent: #5CC2BA; --accent-ink: #08201E;
+      --warn: #FF8A80; --mark: #F0B429;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1720; --paper: #17222E; --ink: #E6ECF2; --muted: #93A3B3;
+    --line: #2B3A49; --field: #1D2B39; --accent: #5CC2BA; --accent-ink: #08201E;
+    --warn: #FF8A80; --mark: #F0B429;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 16px/1.5 var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 18px 48px; }
+  header { margin-bottom: 24px; }
+  h1 {
+    font: 700 clamp(28px, 5vw, 40px)/1.1 var(--display);
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+  }
+  header p { margin: 0; color: var(--muted); max-width: 56ch; }
+
+  .layout { display: grid; gap: 22px; grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 860px) { .layout { grid-template-columns: 1fr 1fr; } .bill { position: sticky; top: 20px; } }
+
+  fieldset {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 6px;
+    margin: 0 0 16px;
+    padding: 16px 18px 18px;
+    min-width: 0;
+  }
+  legend { font: 700 17px var(--display); padding: 0 8px; margin-left: -8px; }
+  .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  .row .full { grid-column: 1 / -1; }
+  label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .hint { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; font-weight: 400; }
+  input {
+    width: 100%;
+    font: 500 16px var(--body);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+  input::placeholder { color: var(--muted); opacity: .7; font-weight: 400; }
+  input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  input[aria-invalid="true"] { border-color: var(--warn); }
+  .error { color: var(--warn); font-size: 13px; margin-top: 4px; min-height: 0; }
+  .error:empty { display: none; }
+  .money { position: relative; }
+  .money span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+  .money input { padding-left: 38px; }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  button {
+    font: 600 15px var(--body);
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  /* The bill itself */
+  .bill {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-top: 6px solid var(--mark);
+    border-radius: 4px 4px 0 0;
+    padding: 22px 22px 26px;
+    position: relative;
+  }
+  .bill::after {
+    content: "";
+    position: absolute; left: -1px; right: -1px; bottom: -9px; height: 9px;
+    background:
+      linear-gradient(135deg, var(--paper) 50%, transparent 50%) 0 0 / 14px 9px repeat-x,
+      linear-gradient(225deg, var(--paper) 50%, transparent 50%) 0 0 / 14px 9px repeat-x;
+    filter: drop-shadow(0 1px 0 var(--line));
+  }
+  .bill h2 { font: 700 22px var(--display); margin: 0 0 2px; letter-spacing: -0.01em; }
+  .bill .meta { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .bill .meta b { color: var(--ink); font-weight: 600; }
+  dl { margin: 0; }
+  .line { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+  .line dt { font-weight: 500; }
+  .line dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .line .sub { grid-column: 1 / -1; font-size: 13px; line-height: 1.6; color: var(--muted); font-variant-numeric: tabular-nums; white-space: pre-line; }
+  .line.empty dd { color: var(--muted); font-weight: 400; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 18px; }
+  .total .lbl { font: 700 18px var(--display); }
+  .total .amt { font: 700 clamp(30px, 6vw, 40px)/1 var(--display); color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .note { margin: 14px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .amt { transition: color .2s; }
+  }
+
+  @media print {
+    :root, :root[data-theme="dark"] { --bg: #fff; --paper: #fff; --ink: #000; --muted: #444; --line: #999; --accent: #000; }
+    body { background: #fff; }
+    header, .form, .no-print { display: none !important; }
+    .wrap { padding: 0; max-width: none; }
+    .layout { display: block; }
+    .bill { position: static; border: 1px solid #000; border-top: 6px solid #000; }
+    .bill::after { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Monthly rent bill</h1>
+    <p>Fill in the amounts on the left. The bill on the right adds up as you type — print it or save it as a PDF to give to your tenant.</p>
+  </header>
+
+  <div class="layout">
+    <form class="form" id="form" onsubmit="return false" autocomplete="off">
+      <fieldset>
+        <legend>Tenant</legend>
+        <div class="row">
+          <div class="full">
+            <label for="tenant">Tenant name</label>
+            <input id="tenant" type="text" placeholder="e.g. Sita Sharma">
+          </div>
+          <div>
+            <label for="unit">Room / flat</label>
+            <input id="unit" type="text" placeholder="e.g. 2nd floor, Room B">
+          </div>
+          <div>
+            <label for="since">Staying since</label>
+            <input id="since" type="date">
+          </div>
+          <div class="full">
+            <label for="billdate">Bill date</label>
+            <input id="billdate" type="date">
+            <span class="hint">Rent is calculated on the 1st of each month.</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Rent</legend>
+        <label for="rent">Agreed monthly rent</label>
+        <div class="money"><span>Rs</span><input id="rent" type="number" inputmode="decimal" min="0" step="any" value="15000"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Electricity</legend>
+        <div class="row">
+          <div>
+            <label for="prev">Previous meter reading</label>
+            <input id="prev" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 1200">
+          </div>
+          <div>
+            <label for="curr">Current meter reading</label>
+            <input id="curr" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 1342">
+          </div>
+          <div>
+            <label for="units">Units used</label>
+            <input id="units" type="number" inputmode="decimal" min="0" step="any" placeholder="Fills from readings">
+            <span class="hint">Or type the units directly.</span>
+          </div>
+          <div>
+            <label for="rate">Rate per unit</label>
+            <div class="money"><span>Rs</span><input id="rate" type="number" inputmode="decimal" min="0" max="12" step="any" value="9.8"></div>
+            <span class="hint">Default 9.8. Maximum 12.</span>
+            <div class="error" id="rateErr" role="alert"></div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Other charges</legend>
+        <div class="row">
+          <div>
+            <label for="water">Water bill</label>
+            <div class="money"><span>Rs</span><input id="water" type="number" inputmode="decimal" min="0" step="any" placeholder="Enter amount"></div>
+          </div>
+          <div>
+            <label for="garbage">Garbage bill</label>
+            <div class="money"><span>Rs</span><input id="garbage" type="number" inputmode="decimal" min="0" step="any" placeholder="Enter amount"></div>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions no-print">
+        <button type="button" class="primary" id="print">Print bill</button>
+        <button type="button" id="reset">Clear for next tenant</button>
+      </div>
+    </form>
+
+    <section class="bill" aria-labelledby="billTitle">
+      <h2 id="billTitle">Rent bill</h2>
+      <p class="meta" id="meta"></p>
+      <dl>
+        <div class="line"><dt>Room rent</dt><dd id="oRent">–</dd></div>
+        <div class="line" id="elecLine"><dt>Electricity</dt><dd id="oElec">–</dd><div class="sub" id="elecSub"></div></div>
+        <div class="line" id="waterLine"><dt>Water</dt><dd id="oWater">–</dd></div>
+        <div class="line" id="garbageLine"><dt>Garbage</dt><dd id="oGarbage">–</dd></div>
+      </dl>
+      <div class="total" aria-live="polite">
+        <span class="lbl">Total to pay</span>
+        <span class="amt" id="oTotal">Rs 0</span>
+      </div>
+      <p class="note">Total = rent + electricity (units × rate) + water + garbage.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+  // Plain HTML and CSS cannot add up typed numbers, so this small script does the arithmetic only.
+  const $ = id => document.getElementById(id);
+  const MAX_RATE = 12;
+  const num = el => { const v = parseFloat(el.value); return isFinite(v) && v > 0 ? v : 0; };
+  const fmt = n => "Rs " + n.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const fmtNum = n => n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  const dateText = v => {
+    if (!v) return "";
+    const d = new Date(v + "T00:00:00");
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  function setDefaultBillDate() {
+    const t = new Date();
+    const next = new Date(t.getFullYear(), t.getMonth() + 1, 1);
+    const pad = n => String(n).padStart(2, "0");
+    $("billdate").value = next.getFullYear() + "-" + pad(next.getMonth() + 1) + "-01";
+  }
+
+  function readingsToUnits() {
+    const p = $("prev").value, c = $("curr").value;
+    if (p !== "" && c !== "") {
+      $("units").value = Math.max(0, parseFloat(c) - parseFloat(p)) || 0;
+    }
+  }
+
+  function line(el, amountEl, amount) {
+    if (amount > 0) { el.classList.remove("empty"); amountEl.textContent = fmt(amount); }
+    else { el.classList.add("empty"); amountEl.textContent = "not added"; }
+  }
+
+  function calc() {
+    const rent = num($("rent"));
+    const units = num($("units"));
+    let rate = num($("rate"));
+
+    // Rate rule: never more than Rs 12 per unit
+    const rateEl = $("rate");
+    if (rate > MAX_RATE) {
+      $("rateErr").textContent = "Rate can't be more than Rs " + MAX_RATE + " per unit. Using Rs " + MAX_RATE + ".";
+      rateEl.setAttribute("aria-invalid", "true");
+      rate = MAX_RATE;
+    } else {
+      $("rateErr").textContent = "";
+      rateEl.removeAttribute("aria-invalid");
+    }
+
+    const elec = Math.round(units * rate * 100) / 100;
+    const water = num($("water"));
+    const garbage = num($("garbage"));
+    const total = rent + elec + water + garbage;
+
+    $("oRent").textContent = fmt(rent);
+    $("oElec").textContent = elec > 0 ? fmt(elec) : "not added";
+    $("elecLine").classList.toggle("empty", !(elec > 0));
+    const sub = [];
+    const pv = $("prev").value, cv = $("curr").value;
+    if (pv !== "" && cv !== "") {
+      sub.push("Previous reading: " + fmtNum(parseFloat(pv)));
+      sub.push("Current reading: " + fmtNum(parseFloat(cv)));
+      sub.push("Units used: " + fmtNum(parseFloat(cv)) + " − " + fmtNum(parseFloat(pv)) + " = " + fmtNum(units) + " units");
+    } else if (units > 0) {
+      sub.push("Units used: " + fmtNum(units) + " units");
+    }
+    if (units > 0) {
+      sub.push("Amount: " + fmtNum(units) + " units × Rs " + fmtNum(rate) + " per unit = " + fmt(elec));
+    }
+    $("elecSub").textContent = sub.join("\n");
+    line($("waterLine"), $("oWater"), water);
+    line($("garbageLine"), $("oGarbage"), garbage);
+    $("oTotal").textContent = fmt(total);
+
+    const parts = [];
+    if ($("tenant").value.trim()) parts.push("<b></b>");
+    const meta = $("meta");
+    meta.textContent = "";
+    const add = (label, value) => {
+      if (!value) return;
+      const s = document.createElement("span");
+      s.append(label + " ");
+      const b = document.createElement("b"); b.textContent = value; s.append(b);
+      if (meta.childNodes.length) meta.append(document.createElement("br"));
+      meta.append(s);
+    };
+    add("Tenant:", $("tenant").value.trim());
+    add("Room:", $("unit").value.trim());
+    add("Staying since:", dateText($("since").value));
+    add("Bill date:", dateText($("billdate").value));
+  }
+
+  $("form").addEventListener("input", e => {
+    if (e.target.id === "prev" || e.target.id === "curr") readingsToUnits();
+    calc();
+  });
+  $("print").addEventListener("click", () => window.print());
+  $("reset").addEventListener("click", () => {
+    ["tenant","unit","since","prev","curr","units","water","garbage"].forEach(id => $(id).value = "");
+    $("rate").value = "9.8";
+    setDefaultBillDate();
+    calc();
+  });
+
+  setDefaultBillDate();
+  calc();
+</script>
+</body>
+</html>
